@@ -1,0 +1,350 @@
+﻿@page "/lecturers-add"
+@using ClosedXML.Excel
+@using ERP_LecturersMangement.DTOs.Request
+@using MudBlazor
+@using FluentValidation
+@using System.Net.Http.Json
+@using System.Text
+@using System.Text.Json
+@using OfficeOpenXml
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject ISnackbar Snackbar
+@inject HttpClient Http
+
+<MudContainer>
+    <div class="home">
+        <div class="students-list">
+            <h3 class="text-center mb-4">Students Add Page</h3>
+
+            <MudCard Class="my-custom-card">
+                <h5><c>ADD LECTURERS FROM EXCEL</c></h5>
+                <InputFile @ref="fileInput" OnChange="HandleFileUpload" />
+                <MudButton class="btn btn-primary" Variant="Variant.Filled" Color="Color.Primary" Style="width:auto" @onclick="SaveAllLecturers">Save All Lecturers</MudButton>
+                <MudCardContent>
+                    <MudForm Model="@model" @ref="@form" Validation="@(lecturerValidator.ValidateValue)" ValidationDelay="0">
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.FirstName" Label="First Name" Required="true" For="@(() => model.FirstName)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.LastName" Label="Last Name" Required="true" For="@(() => model.LastName)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.Email" Label="Email" Required="true" For="@(() => model.Email)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect Label="Department" @bind-Value="@model.Department">
+                                    @foreach (var option in departmentlist)
+                                    {
+                                        <MudSelectItem Value="option">@option</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.NationalId" Label="National ID" Required="true" For="@(() => model.NationalId)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.DoB" Label="DoB" Required="true" For="@(() => model.DoB)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.Phone" Label="Contact Number" Required="true" For="@(() => model.Phone)" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudForm>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Add</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </div>
+
+        <div class="right-column">
+            <div class="calendar">
+                <MudDatePicker PickerVariant="PickerVariant.Static" Date="@(DateTime.Today.AddDays(0))" />
+            </div>
+            <div class="carousel">
+                <MudCarousel Class="mud-width-full" Style="height:200px;" AutoCycle="false" TData="object">
+                    <BulletTemplate Context="selected">
+                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                            <span class="mud-icon-button-label">
+                                <MudIcon Icon="@(selected ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@Color.Inherit" />
+                            </span>
+                        </div>
+                    </BulletTemplate>
+                    <PreviousButtonTemplate>
+                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                            <span class="mud-icon-button-label">
+                                <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipPrevious" Color="@Color.Inherit" />
+                            </span>
+                        </div>
+                    </PreviousButtonTemplate>
+                    <NextButtonTemplate>
+                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                            <span class="mud-icon-button-label">
+                                <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipNext" Color="@Color.Inherit" />
+                            </span>
+                        </div>
+                    </NextButtonTemplate>
+                    <ChildContent>
+                        <MudCarouselItem>
+                            <div class="d-flex" style="height:100%">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmCPY46dq4sYjoK2UVfGXiiLkTYcaMjOn77SZ5Doz2YRf-jSjWWYgcEt2MCTRs9zHFeSc&usqp=CAU" class="mx-auto my-auto" style="max-height:100%;" />
+                            </div>
+                        </MudCarouselItem>
+                        <MudCarouselItem>
+                            <div class="d-flex" style="height:100%">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd_CjS7SitH0s2NB65wqJSlBKLCORt1uHUaFFk2R-4I033JKCXHN5d52SwnJR5amf4T4Q&usqp=CAU" class="mx-auto my-auto" style="max-height:100%;" />
+                            </div>
+                        </MudCarouselItem>
+                        <MudCarouselItem>
+                            <div class="d-flex" style="height:100%">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTz8uRzgWiElKr6ZRQgQUWXrwI_IgQf9UWIfA&s" class="mx-auto my-auto" style="max-height:100%;" />
+                            </div>
+                        </MudCarouselItem>
+                    </ChildContent>
+                </MudCarousel>
+            </div>
+        </div>
+    </div>
+</MudContainer>
+
+<style>
+    .home {
+        display: flex;
+        gap: 20px; /* Add some space between the items */
+    }
+
+        .home .students-list {
+            flex: 1; /* Take up available space */
+        }
+
+        .home .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 0 0 300px; /* Fixed width for the right column */
+            max-width: 300px;
+        }
+
+    .students-list {
+        background-color: #f9f9f9; /* Light background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Enable scrolling if content overflows */
+    }
+
+    .calendar, .carousel {
+        background-color: #ffffff; /* White background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Make sure the calendar fits nicely */
+    .mud-picker-static {
+        width: 100%;
+    }
+
+    .carousel img {
+        max-height: 100%;
+        object-fit: cover;
+    }
+
+    .my-custom-card {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa; /* Light gray background */
+        border: 1px solid #ced4da; /* Gray border */
+    }
+
+    h3 {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+
+@code {
+    private string successMessage;
+    private string errorMessage;
+    private InputFile fileInput;
+    private string uploadError;
+    private List<CreateLecturerRequest> teachers;
+
+    [Parameter]
+    public EventCallback onAdded { get; set; }
+
+    private CreateLecturerRequest model = new CreateLecturerRequest();
+
+    MudForm form;
+    LecturerModelValidator lecturerValidator = new LecturerModelValidator();
+
+    public class LecturerModelValidator : AbstractValidator<CreateLecturerRequest>
+    {
+        public LecturerModelValidator()
+        {
+            RuleFor(x => x.FirstName)
+                .NotEmpty().WithMessage("First Name is Required.")
+                .NotEmpty()
+                .Length(1, 100);
+
+            RuleFor(x => x.LastName)
+                .NotEmpty().WithMessage("Last Name is Required.")
+                .NotEmpty()
+                .Length(1, 100);
+
+            RuleFor(x => x.Email)
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty()
+                .EmailAddress()
+                .MustAsync(async (value, cancellationToken) => await IsUniqueAsync(value));
+        }
+
+        private async Task<bool> IsUniqueAsync(string email)
+        {
+            await Task.Delay(2000);
+            return email.ToLower() != "test@test.com";
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateLecturerRequest>.CreateWithOptions((CreateLecturerRequest)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            try
+            {
+                teachers = await ReadLecturersFromExcel(file);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error uploading file: {ex.Message}", MudBlazor.Severity.Error);
+            }
+        }
+    }
+
+
+
+    public async Task<List<CreateLecturerRequest>> ReadLecturersFromExcel(IBrowserFile file)
+    {
+        var lecturers = new List<CreateLecturerRequest>();
+
+        using (var memoryStream = new MemoryStream())
+        {
+            await file.OpenReadStream().CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using (var workbook = new XLWorkbook(memoryStream))
+            {
+                var worksheet = workbook.Worksheets.FirstOrDefault();
+
+                if (worksheet != null)
+                {
+                    foreach (var row in worksheet.RowsUsed().Skip(1)) // Skip header row
+                    {
+                        var model = new CreateLecturerRequest
+                            {
+                                FirstName = row.Cell(1).GetValue<string>(),
+                                LastName = row.Cell(2).GetValue<string>(),
+                                Department = row.Cell(3).GetValue<string>(),
+                                Email = row.Cell(4).GetValue<string>(),
+                                Phone = row.Cell(5).GetValue<string>(),
+                                NationalId = row.Cell(6).GetValue<string>(),
+                            };
+                        lecturers.Add(model);
+                    }
+                }
+            }
+        }
+
+        return lecturers;
+    }
+
+    private async Task SaveAllLecturers()
+    {
+        if (teachers != null && teachers.Any())
+        {
+            bool allTeachersSaved = true;
+
+            foreach (var teacher in teachers)
+            {
+                try
+                {
+                    var jsonModel = JsonSerializer.Serialize(teacher);
+                    var content = new StringContent(jsonModel, Encoding.UTF8, "application/json");
+                    var response = await Http.PostAsync("https://localhost:7055/api/LecturerManagement/", content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await onAdded.InvokeAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    allTeachersSaved = false;
+                    Snackbar.Add($"Error saving teacher: {ex.Message}", MudBlazor.Severity.Error);
+                }
+            }
+
+            if (allTeachersSaved)
+            {
+                Snackbar.Add("All Lecturers saved successfully", MudBlazor.Severity.Success);
+                await Task.Delay(1500);
+            }
+        }
+
+        Snackbar.Add("All lecturers processed", MudBlazor.Severity.Success);
+    }
+
+    private async Task Submit()
+    {
+        await form.Validate();
+        try
+        {
+            if (form.IsValid)
+            {
+                var jsonModel = JsonSerializer.Serialize(model);
+                var content = new StringContent(jsonModel, Encoding.UTF8, "application/json");
+                var response = await Http.PostAsync("https://localhost:7055/api/LecturerManagement/", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await onAdded.InvokeAsync();
+                    form.Reset();
+                    Snackbar.Add("Lecturer Added Successfully", MudBlazor.Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add("Please Check Your Connection.", MudBlazor.Severity.Error);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Please Check Input Fields", MudBlazor.Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", MudBlazor.Severity.Error);
+        }
+    }
+
+    private List<string> departmentlist = new List<string> { "Department of interdisciplinary Studies", "Computer Department", "Electrical Department", "Civil Department", "Mechanical Department", "Merain Engineering" };
+}

@@ -1,0 +1,99 @@
+﻿@page "/ComResultsListSem3"
+@using ERP_ResultManagement.DTOs.Responses
+@using System.Net.Http.Json
+@using FluentValidation
+@using MudBlazor
+
+@inject NavigationManager NavigationManager
+
+
+@inject IDialogService DialogService
+
+
+<div style="text-align: center; margin-bottom: 0;">
+    <h2><u>COM SEMESTER 3 RESULTS LIST</u></h2>
+</div>
+
+
+<MudTable Items="@_comresults" Class="custom-table">
+    <HeaderContent>
+        
+        <MudTh>Full Name</MudTh>
+        <MudTh>CE0009</MudTh>
+        <MudTh>CE0010</MudTh>
+        <MudTh>CE0011</MudTh>
+        <MudTh>CE0012</MudTh>
+      
+
+    </HeaderContent>
+    <RowTemplate>
+            
+            <MudTd DataLabel="fullname">@context.StudentName</MudTd>
+            <MudTd DataLabel="ce0009">@context.CE0009</MudTd>
+            <MudTd DataLabel="ce0010">@context.CE0010</MudTd>     
+            <MudTd DataLabel="ce0011">@context.CE0011</MudTd>
+            <MudTd DataLabel="ce0012">@context.CE0012</MudTd>
+
+
+
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+
+    <style>
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .custom-table th, .custom-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            .custom-table th {
+                background-color: #f6efef;
+                color: #000000;
+                font-size: large;
+                font-weight: 600;
+                font-family: sans-serif;
+            }
+
+            .custom-table td {
+                background-color: #54a3c2;
+                color: #000000;
+            }
+    </style>
+
+
+@code {
+    private string buttonGroupStyle = "display: flex; gap: 8px;";
+
+    MudMessageBox mbox { get; set; }
+
+    public EventCallback onDelete { get; set; }
+
+    private HttpClient Http = new HttpClient();
+
+    private List<GetComResultsResponse> _comresults = new List<GetComResultsResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
+        }
+        catch (Exception ex)
+        {
+            _comresults = null;
+        }
+    }
+
+
+
+
+}
+ 

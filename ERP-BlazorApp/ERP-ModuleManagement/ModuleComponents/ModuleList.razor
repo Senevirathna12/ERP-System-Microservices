@@ -1,0 +1,252 @@
+﻿@using ERP_ModuleManagement.DTOs.Response
+@using System.Net.Http.Json
+@using MudBlazor
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@using System.Timers
+
+<div class="home">
+    <div class="modules-list">
+        @if (_modules.Count > 0)
+        {
+            <MudTable Items="@_modules">
+                <HeaderContent>
+                    <MudTh>Module Name</MudTh>
+                    <MudTh>Module Code</MudTh>
+                    <MudTh>Module Coordinator</MudTh>
+                    <MudTh>Semester</MudTh>
+                    <MudTh>Lecturers</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Module Name">@context.ModuleName</MudTd>
+                    <MudTd DataLabel="Module Code">@context.ModuleCode</MudTd>
+                    <MudTd DataLabel="Module Coordinator">@context.ModuleCoordineter</MudTd>
+                    <MudTd DataLabel="Semester">@context.Semester</MudTd>
+                    <MudTd DataLabel="Lecturers">@context.Lectures</MudTd>
+                    <MudTd DataLabel="">
+                        <div class="button-group">
+                            <MudFab Color="Color.Secondary" OnClick="@(() => ShowModule(context.ModuleId))"
+                                    StartIcon="@Icons.Material.Filled.Person" Size="Size.Small" />
+                            <MudFab Color="Color.Primary" OnClick="@(() => EditModule(context.ModuleId))"
+                                    StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                            <MudFab Color="Color.Warning" OnClick="@(() => DeleteModule(context.ModuleId))"
+                                    StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        }
+        else
+        {
+            <MudProgressLinear Color="Color.Primary" Size="Size.Large" Indeterminate="true" Class="my-7" />
+        }
+    </div>
+
+    <div class="right-column">
+        <div class="calendar">
+            <MudDatePicker PickerVariant="PickerVariant.Static" Date="@(DateTime.Today.AddDays(0))" />
+        </div>
+        <div class="carousel">
+            <MudCarousel Class="mud-width-full" Style="height:200px;" AutoCycle="false" TData="object">
+                <BulletTemplate Context="selected">
+                    <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                        <span class="mud-icon-button-label">
+                            <MudIcon Icon="@(selected ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@Color.Inherit" />
+                        </span>
+                    </div>
+                </BulletTemplate>
+                <PreviousButtonTemplate>
+                    <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                        <span class="mud-icon-button-label">
+                            <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipPrevious" Color="@Color.Inherit" />
+                        </span>
+                    </div>
+                </PreviousButtonTemplate>
+                <NextButtonTemplate>
+                    <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                        <span class="mud-icon-button-label">
+                            <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipNext" Color="@Color.Inherit" />
+                        </span>
+                    </div>
+                </NextButtonTemplate>
+                <ChildContent>
+                    <MudCarouselItem>
+                        <div class="d-flex" style="height:100%">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmCPY46dq4sYjoK2UVfGXiiLkTYcaMjOn77SZ5Doz2YRf-jSjWWYgcEt2MCTRs9zHFeSc&usqp=CAU" class="mx-auto my-auto" style="max-height:100%;" />
+                        </div>
+                    </MudCarouselItem>
+                    <MudCarouselItem>
+                        <div class="d-flex" style="height:100%">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd_CjS7SitH0s2NB65wqJSlBKLCORt1uHUaFFk2R-4I033JKCXHN5d52SwnJR5amf4T4Q&usqp=CAU" class="mx-auto my-auto" style="max-height:100%;" />
+                        </div>
+                    </MudCarouselItem>
+                    <MudCarouselItem>
+                        <div class="d-flex" style="height:100%">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTz8uRzgWiElKr6ZRQgQUWXrwI_IgQf9UWIfA&s" class="mx-auto my-auto" style="max-height:100%;" />
+                        </div>
+                    </MudCarouselItem>
+                </ChildContent>
+            </MudCarousel>
+        </div>
+    </div>
+</div>
+
+<MudMessageBox @ref="mbox" Title="Warning" CancelText="Cancel">
+    <MessageContent>
+        Are You Sure to Delete This Module!
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
+    </YesButton>
+</MudMessageBox>
+
+@code {
+    private string buttonGroupStyle = "display: flex; gap: 8px;";
+
+    private HttpClient Http = new HttpClient();
+
+    MudMessageBox mbox { get; set; }
+
+    public EventCallback onDelete { get; set; }
+
+    private List<GetModuleResponse> _modules = new List<GetModuleResponse>();
+
+    TimeSpan? time = new TimeSpan(00, 45, 00);
+    private Timer _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _modules = await Http.GetFromJsonAsync<List<GetModuleResponse>>("https://localhost:7103/api/Module/");
+        }
+        catch (Exception ex)
+        {
+            _modules = null;
+        }
+
+        StartTimer();
+    }
+
+    private void StartTimer()
+    {
+        _timer = new Timer(1000);
+        _timer.Elapsed += UpdateTime;
+        _timer.AutoReset = true;
+        _timer.Enabled = true;
+    }
+
+    private void UpdateTime(Object source, ElapsedEventArgs e)
+    {
+        time = DateTime.Now.TimeOfDay;
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task ShowModule(Guid moduleId)
+    {
+        var parameters = new DialogParameters<ModuleProfileDialog> { { x => x.ModuleId, moduleId } };
+
+        var options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.ExtraSmall,
+                FullWidth = true,
+                Position = DialogPosition.Center,
+                CloseOnEscapeKey = true,
+                CloseButton = true
+            };
+
+        var dialog = await DialogService.ShowAsync<ModuleProfileDialog>("Module Profile", parameters, options);
+    }
+
+    async Task EditModule(Guid moduleId)
+    {
+        var parameters = new DialogParameters<EditModuleDialog> { { x => x.moduleId, moduleId } };
+
+        var options = new DialogOptions
+            {
+                MaxWidth = MaxWidth.ExtraSmall,
+                FullWidth = true,
+                Position = DialogPosition.CenterLeft,
+                CloseOnEscapeKey = true,
+                CloseButton = true
+            };
+
+        var dialog = await DialogService.ShowAsync<EditModuleDialog>("Save", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            _modules = await Http.GetFromJsonAsync<List<GetModuleResponse>>("https://localhost:7103/api/Module/");
+        }
+    }
+
+    async Task DeleteModule(Guid moduleId)
+    {
+        bool? result = await mbox.Show();
+        if (result == true)
+        {
+            var response = await Http.DeleteAsync($"https://localhost:7103/api/Module/{moduleId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Module Deleted Successfully", Severity.Success);
+                _modules = await Http.GetFromJsonAsync<List<GetModuleResponse>>("https://localhost:7103/api/Module/");
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Connection error. Module is not deleted.", Severity.Error);
+            }
+        }
+        else
+        {
+            Snackbar.Add("Module is Not Deleted", Severity.Info);
+        }
+    }
+}
+
+<style>
+    .home {
+        display: flex;
+        gap: 20px; /* Add some space between the items */
+    }
+
+    .modules-list {
+        flex: 1; /* Take up available space */
+    }
+
+    .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex: 0 0 300px; /* Fixed width for the right column */
+        max-width: 300px; /* Ensure it doesn't grow too large */
+    }
+
+    .calendar {
+        background-color: #ffffff; /* White background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .carousel {
+        background-color: #ffffff; /* White background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Make sure the calendar fits nicely */
+    .mud-picker-static {
+        width: 100%;
+    }
+
+    .button-group {
+        @buttonGroupStyle;
+    }
+</style>

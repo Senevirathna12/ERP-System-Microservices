@@ -1,0 +1,224 @@
+﻿@page "/ComResultsSem5"
+@rendermode InteractiveServer
+@using ERP_ResultManagement.DTOs.Requests
+@using ClosedXML.Excel
+@using System.Net.Http.Json
+@using System.Text
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject HttpClient Http
+
+ <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+    <MudTabPanel Text="Semester 1" OnClick="@(() => Navigation.NavigateTo("/ComResults"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 2" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem2"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 3" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem3"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 4" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem4"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 5" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem5"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 6" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem6"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 7" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem7"))"></MudTabPanel>
+    <MudTabPanel Text="Semester 8" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem8"))"></MudTabPanel>
+</MudTabs> 
+
+<style>
+    h2 {
+        text-align: center;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    .my-custom-card {
+        max-width: 800px;
+        margin: auto;
+        padding: 50px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+    }
+
+    .btn-primary, .btn-secondary {
+        display: block;
+        width: 100%;
+        max-width: 300px;
+        margin: 10px auto;
+        padding: 10px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3; /* Darker blue for primary button */
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268; /* Darker gray for secondary button */
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+</style>
+
+<h2><c>COM RESULTS</c></h2>
+
+<MudCard Class="my-custom-card">
+    <h5><c>ADD RESULTS FROM EXCEL</c></h5>
+    <InputFile @ref="fileInput" OnChange="HandleFileUpload" />
+    @* <MudButton class="btn btn-primary" @onclick="Save">Save All Com Results</MudButton> *@
+    <MudButton class="btn btn-primary" @onclick="SaveAllComResults">Save All Com Results</MudButton>
+</MudCard>
+<div class="text-center mt-3">
+    <p>Saved File: @savedFileName</p>
+</div>
+<div class="text-center mt-3">
+    <button class="btn btn-secondary" @onclick="ViewResults">View Results</button>
+</div>
+
+@code {
+    private string successMessage;
+    private string errorMessage;
+    private InputFile fileInput;
+    private string uploadError;
+    private string uploadedFileName;
+    private string savedFileName;
+    private List<CreateComResultsRequest> comresults;
+
+    [Parameter]
+    public EventCallback onAdded{ get; set; }
+
+    private CreateComResultsRequest model = new CreateComResultsRequest();
+    private MudForm form;
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+
+            try
+            {
+                comresults = await ReadComResultsFromExcel(file);
+                Snackbar.Add("File uploaded and processed successfully.", Severity.Success);
+                Console.WriteLine("File uploaded .....");
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error uploading file: {ex.Message}", Severity.Error);
+                Console.WriteLine("File NOT uploaded .....");
+            }
+        }
+    }
+
+    public async Task<List<CreateComResultsRequest>> ReadComResultsFromExcel(IBrowserFile file)
+    {
+        var comresults = new List<CreateComResultsRequest>();
+
+        using (var memoryStream = new MemoryStream())
+        {
+            await file.OpenReadStream().CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using (var workbook = new XLWorkbook(memoryStream))
+            {
+                var worksheet = workbook.Worksheets.FirstOrDefault();
+
+                if (worksheet != null)
+                {
+                    foreach (var row in worksheet.RowsUsed().Skip(1)) // Skip header row
+                    {
+                        var model = new CreateComResultsRequest
+                            {
+                                ComId = row.Cell(1).GetValue<int>(),
+                                StudentName = row.Cell(2).GetValue<string>(),
+                                CE0001 = row.Cell(3).GetValue<string>(),
+                                CE0002 = row.Cell(4).GetValue<string>(),
+                                CE0003 = row.Cell(5).GetValue<string>(),
+                                CE0004 = row.Cell(6).GetValue<string>(),
+                                CE0005 = row.Cell(7).GetValue<string>(),
+                                CE0006 = row.Cell(8).GetValue<string>(),
+                                CE0007 = row.Cell(9).GetValue<string>(),
+                                CE0008 = row.Cell(10).GetValue<string>(),
+                                CE0009 = row.Cell(11).GetValue<string>(),
+                                CE0010 = row.Cell(12).GetValue<string>(),
+                                CE0011 = row.Cell(13).GetValue<string>(),
+                                CE0012 = row.Cell(14).GetValue<string>(),
+                            };
+                        comresults.Add(model);
+                    }
+                }
+            }
+        }
+
+        return comresults;
+    }
+
+    private void Save()
+    {
+        if (!string.IsNullOrEmpty(uploadedFileName))
+        {
+            savedFileName = uploadedFileName;
+        }
+    }
+
+    private async Task SaveAllComResults()
+    {
+        if (comresults != null && comresults.Any())
+        {
+            bool allComResultsSaved = true;
+
+            foreach (var comresult in comresults)
+            {
+                try
+                {
+                    var jsonModel = JsonSerializer.Serialize(comresult);
+                    var content = new StringContent(jsonModel, Encoding.UTF8, "application/json");
+                    var response = await Http.PostAsync("https://localhost:7186/api/ComResults", content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await onAdded.InvokeAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    allComResultsSaved = false;
+                    Snackbar.Add($"Error saving com results: {ex.Message}", Severity.Error);
+                    Console.Write(ex.Message);
+                }
+            }
+
+            if (allComResultsSaved)
+            {
+                Snackbar.Add("All Com Results saved successfully", Severity.Success);
+                await Task.Delay(1500);
+            }
+        }
+        Snackbar.Add("All com results processed", Severity.Success);
+    }
+
+    private void ViewResults()
+    {
+        Navigation.NavigateTo("/ComResultsListSem5");
+    }
+}
+ 
