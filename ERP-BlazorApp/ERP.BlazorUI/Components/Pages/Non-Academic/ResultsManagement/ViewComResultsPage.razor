@@ -4,6 +4,8 @@
 @using MudBlazor
 
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 
 <div style="text-align: center; margin-bottom: 0;">
@@ -19,6 +21,8 @@
         <MudTh>CE0002</MudTh>
         <MudTh>CE0003</MudTh>
         <MudTh>CE0004</MudTh>
+        <MudTh>Action</MudTh>
+
       
 
     </HeaderContent>
@@ -29,14 +33,21 @@
             <MudTd DataLabel="ce0002">@context.CE0002</MudTd>     
             <MudTd DataLabel="ce0003">@context.CE0003</MudTd>
             <MudTd DataLabel="ce0004">@context.CE0004</MudTd>
+            <MudTd DataLabel="Actions">
+                <div class="button-group">
+
+                    <MudFab Color="Color.Warning" OnClick="@(()=>DeleteResult(context.ComId))"
+                            StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                </div>
+
+            </MudTd>
 
 
-
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+</RowTemplate>
+    <PagerContent>
+        <MudTablePager/>
+    </PagerContent>
+</MudTable>
 
     <style>
         .custom-table {
@@ -75,6 +86,31 @@
     private HttpClient Http = new HttpClient();
 
     private List<GetComResultsResponse> _comresults = new List<GetComResultsResponse>();
+
+    async Task DeleteResult(Guid comId)
+    {
+        bool? result = await mbox.Show();
+        if (result == true)
+        {
+            var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Result Deleted Successfully", Severity.Success);
+                _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
+            }
+
+        }
+        else
+        {
+            Snackbar.Add("Result is Not Deleted", Severity.Info);
+        }
+
+    }
 
     protected override async Task OnInitializedAsync()
     {
