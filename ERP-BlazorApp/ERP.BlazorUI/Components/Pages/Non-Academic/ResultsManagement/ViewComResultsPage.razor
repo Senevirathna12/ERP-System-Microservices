@@ -10,7 +10,8 @@
 @inject ISnackbar Snackbar
 @inject HttpClient Http
 
-<MudPopoverProvider/>
+<MudPopoverProvider />
+<MudSnackbarProvider />
 
 <div style="text-align: center; margin-bottom: 0;">
     <h2><u>COM SEMESTER 1 RESULTS LIST</u></h2>
@@ -25,11 +26,10 @@
         <MudTh>CE0002</MudTh>
         <MudTh>CE0003</MudTh>
         <MudTh>CE0004</MudTh>
-		<MudTh>Action</MudTh>
-
-      
+		<MudTh>Action</MudTh>      
 
     </HeaderContent>
+
     <RowTemplate>
             
             <MudTd DataLabel="fullname">@context.StudentName</MudTd>
@@ -123,8 +123,9 @@
         // {
         //     Snackbar.Add("Result is Not Deleted", Severity.Info);
         // }
-        
+
         var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
+        // OnInitializedAsync();
         if (response.IsSuccessStatusCode)
         {
             Snackbar.Add("Result Deleted Successfully", Severity.Success);

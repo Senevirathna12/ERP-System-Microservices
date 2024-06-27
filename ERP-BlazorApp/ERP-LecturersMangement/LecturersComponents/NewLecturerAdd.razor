@@ -60,53 +60,28 @@
         </div>
 
         <div class="right-column">
-            <div class="calendar">
-                <MudDatePicker PickerVariant="PickerVariant.Static" Date="@(DateTime.Today.AddDays(0))" />
-            </div>
-            <div class="carousel">
-                <MudCarousel Class="mud-width-full" Style="height:200px;" AutoCycle="false" TData="object">
-                    <BulletTemplate Context="selected">
-                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
-                            <span class="mud-icon-button-label">
-                                <MudIcon Icon="@(selected ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Circle)" Color="@Color.Inherit" />
-                            </span>
-                        </div>
-                    </BulletTemplate>
-                    <PreviousButtonTemplate>
-                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
-                            <span class="mud-icon-button-label">
-                                <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipPrevious" Color="@Color.Inherit" />
-                            </span>
-                        </div>
-                    </PreviousButtonTemplate>
-                    <NextButtonTemplate>
-                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
-                            <span class="mud-icon-button-label">
-                                <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium" Icon="@Icons.Material.Filled.SkipNext" Color="@Color.Inherit" />
-                            </span>
-                        </div>
-                    </NextButtonTemplate>
-                    <ChildContent>
-                        <MudCarouselItem>
-                            <div class="d-flex" style="height:100%">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmCPY46dq4sYjoK2UVfGXiiLkTYcaMjOn77SZ5Doz2YRf-jSjWWYgcEt2MCTRs9zHFeSc&usqp=CAU" class="mx-auto my-auto" style="max-height:100%;" />
-                            </div>
-                        </MudCarouselItem>
-                        <MudCarouselItem>
-                            <div class="d-flex" style="height:100%">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd_CjS7SitH0s2NB65wqJSlBKLCORt1uHUaFFk2R-4I033JKCXHN5d52SwnJR5amf4T4Q&usqp=CAU" class="mx-auto my-auto" style="max-height:100%;" />
-                            </div>
-                        </MudCarouselItem>
-                        <MudCarouselItem>
-                            <div class="d-flex" style="height:100%">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTz8uRzgWiElKr6ZRQgQUWXrwI_IgQf9UWIfA&s" class="mx-auto my-auto" style="max-height:100%;" />
-                            </div>
-                        </MudCarouselItem>
-                    </ChildContent>
-                </MudCarousel>
-            </div>
+            <MudCarousel Class="mud-width-full" Style="height:200px;" AutoCycle="@autocycle" TData="object">
+                <MudCarouselItem Transition="transition" Color="@Color.Primary">
+                    <div class="d-flex position-relative" style="height:100%; width:100%;">
+                        <img src="https://docs.fohss.lk/storage/0dbd61057a19f1d42453a7ecc60d299c/0dbd61057a19f1d42453a7ecc60d299c/207c48c4885718c049c55e6ea58a0441.jpg" alt="Image 1" style="object-fit:cover; width:100%; height:100%;" />
+                    </div>
+                </MudCarouselItem>
+                <MudCarouselItem Transition="transition" Color="@Color.Secondary">
+                    <div class="d-flex" style="height:100%; width:100%;">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZjo92OcdaC1p1Dk3wlYMPpC3G9aGow4ofDmUsxDvBDsTMStpPU7IrpSMvC7rHhcdnxmM&usqp=CAU" alt="Image 1" style="object-fit:cover; width:100%; height:100%;" />
+                    </div>
+                </MudCarouselItem>
+                <MudCarouselItem Transition="transition">
+                    <div class="d-flex" style="height:100%; width:100%;">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj4aRb3L0WiXE9y9AbOW1HU33lGPQlshGx-g&s" alt="Image 1" style="object-fit:cover; width:100%; height:100%;" />
+                    </div>
+                </MudCarouselItem>
+            </MudCarousel>
+            <MudDatePicker Class="mb-5" PickerVariant="PickerVariant.Static" Rounded="true" Elevation="12" Date="DateTime.Today" />
         </div>
     </div>
+
+    
 </MudContainer>
 
 <style>
@@ -173,6 +148,9 @@
 </style>
 
 @code {
+
+    private bool autocycle = true;
+    private Transition transition = Transition.Slide;
     private string successMessage;
     private string errorMessage;
     private InputFile fileInput;
