@@ -8,7 +8,9 @@
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject HttpClient Http
 
+<MudPopoverProvider/>
 
 <div style="text-align: center; margin-bottom: 0;">
     <h2><u>COM SEMESTER 1 RESULTS LIST</u></h2>
@@ -23,7 +25,7 @@
         <MudTh>CE0002</MudTh>
         <MudTh>CE0003</MudTh>
         <MudTh>CE0004</MudTh>
-		<MudTh>Action</MudTh><a href="c:\users\amith\desktop\final03\grp-project\erp-blazorapp\erp.blazorui\components\pages\non-academic\resultsmanagement\viewcomresultssem4page.razor">c:\users\amith\desktop\final03\grp-project\erp-blazorapp\erp.blazorui\components\pages\non-academic\resultsmanagement\viewcomresultssem4page.razor</a>
+		<MudTh>Action</MudTh>
 
       
 
@@ -45,72 +47,95 @@
             </MudTd>
 
 
-</RowTemplate>
+    </RowTemplate>
     <PagerContent>
         <MudTablePager/>
     </PagerContent>
 </MudTable>
 
-    <style>
-        .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
 
-            .custom-table th, .custom-table td {
-                border: 1px solid #ddd;
-                padding: 8px;
-            }
+<MudMessageBox @ref="mbox" Title="Warning" CancelText="Cancel">
+    <MessageContent>
+        Deleting can <b><i>not</i></b> be undone!
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
+    </YesButton>
+</MudMessageBox>
 
-            .custom-table th {
-                background-color: #f6efef;
-                color: #000000;
-                font-size: large;
-                font-weight: 600;
-                font-family: sans-serif;
-            }
 
-            .custom-table td {
-                background-color: #54a3c2;
-                color: #000000;
-            }
-    </style>
+<style>
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .custom-table th, .custom-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .custom-table th {
+        background-color: #f6efef;
+        color: #000000;
+        font-size: large;
+        font-weight: 600;
+        font-family: sans-serif;
+    }
+
+    .custom-table td {
+        background-color: #54a3c2;
+        color: #000000;
+    }
+</style>
 
 
 @code {
     private string buttonGroupStyle = "display: flex; gap: 8px;";
 
-    MudMessageBox mbox { get; set; }
-
     public EventCallback onDelete { get; set; }
-
-    private HttpClient Http = new HttpClient();
 
     private List<GetComResultsResponse> _comresults = new List<GetComResultsResponse>();
 
+    MudMessageBox mbox { get; set; }
+
+
     async Task DeleteResult(Guid comId)
     {
-        bool? result = await mbox.Show();
-        if (result == true)
-        {
-            var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
-            if (response.IsSuccessStatusCode)
-            {
-                Snackbar.Add("Result Deleted Successfully", Severity.Success);
-                _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
-                StateHasChanged();
-            }
-            else
-            {
-                Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
-            }
+        // bool? result = await mbox.Show();
+        // if (result == true)
+        // {
+        //     var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
+        //     if (response.IsSuccessStatusCode)
+        //     {
+        //         Snackbar.Add("Result Deleted Successfully", Severity.Success);
+        //         _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
+        //         StateHasChanged();
+        //     }
+        //     else
+        //     {
+        //         Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
+        //     }
 
+        // }
+        // else
+        // {
+        //     Snackbar.Add("Result is Not Deleted", Severity.Info);
+        // }
+        
+        var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Result Deleted Successfully", Severity.Success);
+            _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
+            StateHasChanged();
         }
         else
         {
-            Snackbar.Add("Result is Not Deleted", Severity.Info);
+            Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
         }
+
 
     }
 
