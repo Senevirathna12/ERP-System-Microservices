@@ -23,8 +23,7 @@
         <MudTh>CE0002</MudTh>
         <MudTh>CE0003</MudTh>
         <MudTh>CE0004</MudTh>
-		<MudTh>Action</MudTh><a href="c:\users\amith\desktop\final03\grp-project\erp-blazorapp\erp.blazorui\components\pages\non-academic\resultsmanagement\viewcomresultssem4page.razor">c:\users\amith\desktop\final03\grp-project\erp-blazorapp\erp.blazorui\components\pages\non-academic\resultsmanagement\viewcomresultssem4page.razor</a>
-
+		<MudTh>Action</MudTh>
       
 
     </HeaderContent>
@@ -45,13 +44,40 @@
             </MudTd>
 
 
-</RowTemplate>
+
+
+    </RowTemplate>
     <PagerContent>
         <MudTablePager/>
     </PagerContent>
 </MudTable>
 
+
+    <MudButton OnClick="NavigateADD" Variant="Variant.Filled" Color="Color.Primary" Class="custom-back-button">
+        <MudIcon Icon="Icons.Material.Filled.ArrowBack" />
+        Back To ADD
+    </MudButton>
+
     <style>
+
+        .custom-back-button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #3f51b5; /* Primary color */
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .custom-back-button .mud-icon-root {
+                margin-right: 5px;
+        }
+
+
+
         .custom-table {
             width: 100%;
             border-collapse: collapse;
@@ -78,7 +104,7 @@
     </style>
 
 
-@code {
+    @code {
     private string buttonGroupStyle = "display: flex; gap: 8px;";
 
     MudMessageBox mbox { get; set; }
@@ -88,6 +114,13 @@
     private HttpClient Http = new HttpClient();
 
     private List<GetComResultsResponse> _comresults = new List<GetComResultsResponse>();
+
+
+    private void NavigateADD()
+    {
+        NavigationManager.NavigateTo("/ComResults");
+       
+    }
 
     async Task DeleteResult(Guid comId)
     {

@@ -49,6 +49,11 @@
         </PagerContent>
 </MudTable>
 
+    <MudButton OnClick="NavigateADD" Variant="Variant.Filled" Color="Color.Primary" Class="custom-back-button">
+        <MudIcon Icon="Icons.Material.Filled.ArrowBack" />
+        Back To ADD
+    </MudButton>
+
     <style>
         .custom-table {
             width: 100%;
@@ -86,6 +91,13 @@
     private HttpClient Http = new HttpClient();
 
     private List<GetDeieResultsResponse> _elecresults = new List<GetDeieResultsResponse>();
+
+
+    private void NavigateADD()
+    {
+        NavigationManager.NavigateTo("/ElecResults");
+
+    }
 
     async Task DeleteResult(Guid eleId)
     {

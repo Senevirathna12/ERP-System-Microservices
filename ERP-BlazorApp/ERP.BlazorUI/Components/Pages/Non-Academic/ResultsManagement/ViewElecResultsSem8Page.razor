@@ -1,5 +1,141 @@
-﻿<h3>ViewElecResultsSem8Page</h3>
+﻿@page "/ElecResultsListSem8"
+@using System.Net.Http.Json
+@using ERP.ResultManagement.DTOs.Responses
+@using MudBlazor
 
-@code {
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+
+<div style="text-align: center; margin-bottom: 0;">
+    <h2><u>DEIE SEMESTER 8 RESULTS LIST</u></h2>
+</div>
+
+
+<MudTable Items="@_elecresults" Class="custom-table">
+    <HeaderContent>
+
+        <MudTh>Full Name</MudTh>
+        <MudTh>EE0029</MudTh>
+        <MudTh>EE0030</MudTh>
+        <MudTh>EE0031</MudTh>
+        <MudTh>EE0032</MudTh>
+        <MudTh>Action</MudTh>
+
+
+
+    </HeaderContent>
+    <RowTemplate>
+
+        <MudTd DataLabel="fullname">@context.StudentName</MudTd>
+            <MudTd DataLabel="ee0001">@context.EE0001</MudTd>
+            <MudTd DataLabel="ee0002">@context.EE0002</MudTd>
+            <MudTd DataLabel="ee0003">@context.EE0003</MudTd>
+            <MudTd DataLabel="ee0004">@context.EE0004</MudTd>
+            <MudTd DataLabel="Actions">
+                <div class="button-group">
+
+                    <MudFab Color="Color.Warning" OnClick="@(()=>DeleteResult(context.DEIEid))"
+                            StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                </div>
+
+            </MudTd>
+
+
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+
+    <MudButton OnClick="NavigateADD" Variant="Variant.Filled" Color="Color.Primary" Class="custom-back-button">
+        <MudIcon Icon="Icons.Material.Filled.ArrowBack" />
+        Back To ADD
+    </MudButton>
+
+    <style>
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .custom-table th, .custom-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            .custom-table th {
+                background-color: #f6efef;
+                color: #000000;
+                font-size: large;
+                font-weight: 600;
+                font-family: sans-serif;
+            }
+
+            .custom-table td {
+                background-color: #54a3c2;
+                color: #000000;
+            }
+    </style>
+
+
+    @code {
+    private string buttonGroupStyle = "display: flex; gap: 8px;";
+
+    MudMessageBox mbox { get; set; }
+
+    public EventCallback onDelete { get; set; }
+
+    private HttpClient Http = new HttpClient();
+
+    private List<GetDeieResultsResponse> _elecresults = new List<GetDeieResultsResponse>();
+
+    private void NavigateADD()
+    {
+        NavigationManager.NavigateTo("/ElecResultsSem8");
+
+    }
+
+    async Task DeleteResult(Guid eleId)
+    {
+        bool? result = await mbox.Show();
+        if (result == true)
+        {
+            var response = await Http.DeleteAsync($"https://localhost:7186/api/DeieResults/{eleId}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Result Deleted Successfully", Severity.Success);
+                _elecresults = await Http.GetFromJsonAsync<List<GetDeieResultsResponse>>("https://localhost:7186/api/DeieResults");
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
+            }
+
+        }
+        else
+        {
+            Snackbar.Add("Result is Not Deleted", Severity.Info);
+        }
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _elecresults = await Http.GetFromJsonAsync<List<GetDeieResultsResponse>>("https://localhost:7186/api/DeieResults");
+        }
+        catch (Exception ex)
+        {
+            _elecresults = null;
+        }
+    }
+
+
+
 
 }

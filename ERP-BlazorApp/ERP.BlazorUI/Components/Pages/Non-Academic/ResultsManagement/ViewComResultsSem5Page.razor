@@ -1,13 +1,13 @@
 ﻿@page "/ComResultsListSem5"
+@rendermode InteractiveServer
 @using ERP_ResultManagement.DTOs.Responses
 @using System.Net.Http.Json
-@using FluentValidation
 @using MudBlazor
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject NavigationManager NavigationManager
-
-
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 
 <div style="text-align: center; margin-bottom: 0;">
@@ -17,22 +17,32 @@
 
 <MudTable Items="@_comresults" Class="custom-table">
     <HeaderContent>
-        
+
         <MudTh>Full Name</MudTh>
         <MudTh>CE0017</MudTh>
         <MudTh>CE0018</MudTh>
         <MudTh>CE0019</MudTh>
         <MudTh>CE0020</MudTh>
-      
+        <MudTh>Action</MudTh>
+
 
     </HeaderContent>
     <RowTemplate>
-            
-            <MudTd DataLabel="fullname">@context.StudentName</MudTd>
-            <MudTd DataLabel="ce0001">@context.CE0001</MudTd>
-            <MudTd DataLabel="ce0002">@context.CE0002</MudTd>     
-            <MudTd DataLabel="ce0003">@context.CE0003</MudTd>
-            <MudTd DataLabel="ce0004">@context.CE0004</MudTd>
+
+        <MudTd DataLabel="fullname">@context.StudentName</MudTd>
+            <MudTd DataLabel="ce0005">@context.CE0005</MudTd>
+            <MudTd DataLabel="ce0006">@context.CE0006</MudTd>
+            <MudTd DataLabel="ce0007">@context.CE0007</MudTd>
+            <MudTd DataLabel="ce0008">@context.CE0008</MudTd>
+            <MudTd DataLabel="Actions">
+                <div class="button-group">
+
+                    <MudFab Color="Color.Warning" OnClick="@(()=>DeleteResult(context.ComId))"
+                            StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                </div>
+
+            </MudTd>
+
 
 
 
@@ -42,7 +52,32 @@
         </PagerContent>
     </MudTable>
 
+
+    <MudButton OnClick="NavigateADD" Variant="Variant.Filled" Color="Color.Primary" Class="custom-back-button">
+        <MudIcon Icon="Icons.Material.Filled.ArrowBack" />
+        Back To ADD
+    </MudButton>
+
     <style>
+
+        .custom-back-button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #3f51b5; /* Primary color */
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+            .custom-back-button .mud-icon-root {
+                margin-right: 5px;
+            }
+
+
+
         .custom-table {
             width: 100%;
             border-collapse: collapse;
@@ -69,7 +104,7 @@
     </style>
 
 
-@code {
+    @code {
     private string buttonGroupStyle = "display: flex; gap: 8px;";
 
     MudMessageBox mbox { get; set; }
@@ -79,6 +114,38 @@
     private HttpClient Http = new HttpClient();
 
     private List<GetComResultsResponse> _comresults = new List<GetComResultsResponse>();
+
+
+    private void NavigateADD()
+    {
+        NavigationManager.NavigateTo("/ComResultsSem5");
+
+    }
+
+    async Task DeleteResult(Guid comId)
+    {
+        bool? result = await mbox.Show();
+        if (result == true)
+        {
+            var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Result Deleted Successfully", Severity.Success);
+                _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
+            }
+
+        }
+        else
+        {
+            Snackbar.Add("Result is Not Deleted", Severity.Info);
+        }
+
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,4 +163,3 @@
 
 
 }
- 
