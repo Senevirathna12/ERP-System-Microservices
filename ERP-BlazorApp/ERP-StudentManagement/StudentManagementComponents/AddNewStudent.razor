@@ -10,104 +10,143 @@
 @inject ISnackbar Snackbar
 @inject HttpClient Http
 
-
-
-<MudContainer>
- 
-
-    <MudCard Class="my-custom-card">
-           <div>
-        <h5><c>ADD STUDENTS FROM EXCEL</c></h5>
-    <InputFile @ref="fileInput" OnChange="HandleFileUpload" />
-
-           
-   <MudButton class="btn btn-primary" Variant="Variant.Filled" Color="Color.Primary" Style="width:auto" @onclick="SaveAllStudents">Save All Lecturers</MudButton>
+<div class="home">
+    <div class="students-list">
+        <MudContainer>
+            <MudCard Class="my-custom-card">
+                <div>
+                    <h5><c>ADD STUDENTS FROM EXCEL</c></h5>
+                    <InputFile @ref="fileInput" OnChange="HandleFileUpload" />
+                    <MudButton class="btn btn-primary" Variant="Variant.Filled" Color="Color.Primary" Style="width:auto" @onclick="SaveAllStudents">Save All Lecturers</MudButton>
+                </div>
+                <MudCardContent>
+                    <MudForm Model="@model" @ref="@form"
+                             Validation="@(studentValidator.ValidateValue)"
+                             ValidationDelay="0">
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.RegistrationNumber"
+                                              Label="Registration Number"
+                                              Required="true"
+                                              For="@(()=>model.RegistrationNumber)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.FirstName"
+                                              Label="First Name"
+                                              Required="true"
+                                              For="@(()=>model.FirstName)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.LastName"
+                                              Label="Last Name"
+                                              Required="true"
+                                              For="@(()=>model.LastName)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.Email"
+                                              Label="Email"
+                                              Required="true"
+                                              For="@(()=>model.Email)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.Phone"
+                                              Label="Phone"
+                                              Required="true"
+                                              For="@(()=>model.Phone)" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect Label="Department" @bind-Value="@model.Department">
+                                    @foreach (var option in departmentlist)
+                                    {
+                                        <MudSelectItem Value="option">@option</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.District"
+                                              Label="District" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.NationalId"
+                                              Label="NationalID" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.Address1"
+                                              Label="Address1" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="model.Address2"
+                                              Label="Address2" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudForm>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Class="ml-auto"
+                               OnClick="@(async () => await Submit())">Add</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudContainer>
     </div>
-        <MudCardContent>
-            <MudForm Model="@model" @ref="@form"
-                     Validation="@(studentValidator.ValidateValue)"
-                     ValidationDelay="0">
-                <MudGrid>
+    <div class="right-column">
+        <MudCarousel Class="mud-width-full mb-5" Style="height:200px;" AutoCycle="@autocycle" TData="object">
+            <MudCarouselItem Transition="transition" Color="@Color.Primary">
+                <div class="d-flex position-relative" style="height:100%; width:100%;">
+                    <img src="https://docs.fohss.lk/storage/0dbd61057a19f1d42453a7ecc60d299c/0dbd61057a19f1d42453a7ecc60d299c/207c48c4885718c049c55e6ea58a0441.jpg" alt="Image 1" style="object-fit:cover; width:100%; height:100%;" />
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@Color.Secondary">
+                <div class="d-flex" style="height:100%; width:100%;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZjo92OcdaC1p1Dk3wlYMPpC3G9aGow4ofDmUsxDvBDsTMStpPU7IrpSMvC7rHhcdnxmM&usqp=CAU" alt="Image 1" style="object-fit:cover; width:100%; height:100%;" />
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition">
+                <div class="d-flex" style="height:100%; width:100%;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj4aRb3L0WiXE9y9AbOW1HU33lGPQlshGx-g&s" alt="Image 1" style="object-fit:cover; width:100%; height:100%;" />
+                </div>
+            </MudCarouselItem>
+        </MudCarousel>
+        <MudDatePicker Class="mb-5" PickerVariant="PickerVariant.Static" Rounded="true" Elevation="12" Date="DateTime.Today" />
+    </div>
+</div>
 
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.RegistrationNumber"
-                                      Label="Registration Number"
-                                      Required="true"
-                                      For="@(()=>model.RegistrationNumber)" />
-                    </MudItem>
-
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.FirstName"
-                                      Label="First Name"
-                                      Required="true"
-                                      For="@(()=>model.FirstName)" />
-                    </MudItem>
-
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.LastName"
-                                      Label="Last Name"
-                                      Required="true"
-                                      For="@(()=>model.LastName)" />
-                    </MudItem>
-
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.Email"
-                                      Label="Email"
-                                      Required="true"
-                                      For="@(()=>model.Email)" />
-                    </MudItem>
-
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.Phone"
-                                      Label="Phone"
-                                      Required="true"
-                                      For="@(()=>model.Phone)" />
-                    </MudItem>
-
-
-                    <MudItem xs="12">
-                        <MudSelect Label="Department" @bind-Value="@model.Department">
-                            @foreach (var option in departmentlist)
-                            {
-                                <MudSelectItem Value="option">@option</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudItem>
-
-
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.District"
-                                      Label="District" />
-                    </MudItem>
-
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.NationalId"
-                                      Label="NationalID" />
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.Address1"
-                                      Label="Address1" />
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.Address2"
-                                      Label="Address2" />
-                    </MudItem>
-
-                </MudGrid>
-            </MudForm>
-        </MudCardContent>
-
-        <MudCardActions>
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Class="ml-auto"
-                       OnClick="@(async () => await Submit())">Add</MudButton>
-        </MudCardActions>
-
-    </MudCard>
-</MudContainer>
 
 <style>
+    .home {
+        display: flex;
+        gap: 20px; /* Add some space between the items */
+    }
+
+    .home .students-list {
+        flex: 1; /* Take up available space */
+    }
+
+    .home .calendar {
+        flex: 0 0 300px; /* Fixed width for the calendar */
+        max-width: 300px; /* Ensure it doesn't grow too large */
+    }
+
+    .students-list {
+        background-color: #f9f9f9; /* Light background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Enable scrolling if content overflows */
+    }
+
+    .calendar {
+        background-color: #ffffff; /* White background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .mud-picker-static {
+        width: 100%;
+    }
+
     .my-custom-card {
         max-width: 800px;
         margin: auto;
@@ -119,12 +158,9 @@
     }
 </style>
 
-
-
-
-
-
-@code{
+@code {
+    private bool autocycle = true;
+    private Transition transition = Transition.Slide;
 
     private string successMessage;
     private string errorMessage;
@@ -134,24 +170,18 @@
 
     [Parameter]
     public EventCallback onAdded { get; set; }
-   
 
     private CreateStudentRequest model = new CreateStudentRequest();
-
     StudentModelValidator studentValidator = new StudentModelValidator();
-
-
     MudForm form;
 
-
     public class StudentModelValidator : AbstractValidator<CreateStudentRequest>
-
     {
         public StudentModelValidator()
         {
             RuleFor(x => x.RegistrationNumber)
-               .NotEmpty().WithMessage("Registration Number is Required.")
-               .Matches("^EG/.*$").WithMessage("Registration Number must start with 'EG/'");
+                .NotEmpty().WithMessage("Registration Number is Required.")
+                .Matches("^EG/.*$").WithMessage("Registration Number must start with 'EG/'");
 
             RuleFor(x => x.FirstName)
                 .NotEmpty().WithMessage("First Name is Required.")
@@ -163,20 +193,16 @@
                 .MinimumLength(3)
                 .MaximumLength(20);
 
-
             RuleFor(x => x.Phone)
                 .NotEmpty().WithMessage("Contact number is required.")
                 .Matches("^[0-9]*$").WithMessage("Contact number can only contain numbers.");
-
 
             RuleFor(x => x.Email)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .EmailAddress()
                 .MustAsync(async (value, cancellationToken) => await IsUniqueAsync(value));
-
         }
-
 
         private async Task<bool> IsUniqueAsync(string email)
         {
@@ -184,12 +210,10 @@
             return email.ToLower() != "test@test.com";
         }
 
-
         public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
         {
-
             var result = await ValidateAsync(ValidationContext<CreateStudentRequest>
-                 .CreateWithOptions((CreateStudentRequest)model, x => x.IncludeProperties(propertyName)));
+                .CreateWithOptions((CreateStudentRequest)model, x => x.IncludeProperties(propertyName)));
 
             if (result.IsValid)
                 return Array.Empty<string>();
@@ -200,7 +224,6 @@
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;
-
         if (file != null)
         {
             try
@@ -226,25 +249,23 @@
             using (var workbook = new XLWorkbook(memoryStream))
             {
                 var worksheet = workbook.Worksheets.FirstOrDefault();
-
                 if (worksheet != null)
                 {
                     foreach (var row in worksheet.RowsUsed().Skip(1)) // Skip header row
                     {
                         var model = new CreateStudentRequest
-                            {
-                                RegistrationNumber = row.Cell(1).GetValue<string>(),
-                                FirstName = row.Cell(2).GetValue<string>(),
-                                LastName = row.Cell(3).GetValue<string>(),
-                                Email = row.Cell(4).GetValue<string>(),
-                                Phone = row.Cell(5).GetValue<string>(),
-                                Department = row.Cell(6).GetValue<string>(),
-                                District = row.Cell(7).GetValue<string>(),
-                                NationalId = row.Cell(8).GetValue<string>(),
-                                // DateOfBirth = row.Cell(9).GetValue<string>(),
-                                Address1 = row.Cell(10).GetValue<string>(),
-                                Address2 = row.Cell(11).GetValue<string>()
-                            };
+                        {
+                            RegistrationNumber = row.Cell(1).GetValue<string>(),
+                            FirstName = row.Cell(2).GetValue<string>(),
+                            LastName = row.Cell(3).GetValue<string>(),
+                            Email = row.Cell(4).GetValue<string>(),
+                            Phone = row.Cell(5).GetValue<string>(),
+                            Department = row.Cell(6).GetValue<string>(),
+                            District = row.Cell(7).GetValue<string>(),
+                            NationalId = row.Cell(8).GetValue<string>(),
+                            Address1 = row.Cell(10).GetValue<string>(),
+                            Address2 = row.Cell(11).GetValue<string>()
+                        };
                         students.Add(model);
                     }
                 }
@@ -296,9 +317,7 @@
         try
         {
             if (form.IsValid)
-
             {
-
                 var jsonModel = JsonSerializer.Serialize(model);
                 var content = new StringContent(jsonModel, Encoding.UTF8, "application/json");
                 var response = await Http.PostAsync("https://localhost:7055/api/StudentManagement", content);
@@ -313,22 +332,17 @@
                 {
                     Snackbar.Add("Please Check Your Connection.", MudBlazor.Severity.Error);
                 }
-
-
             }
             else
             {
                 Snackbar.Add("Please Check Input Fields", MudBlazor.Severity.Error);
             }
-
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Error: {ex.Message}", MudBlazor.Severity.Error);
         }
-
     }
 
     private List<string> departmentlist = new List<string> { "Frist Year", "Computer Department", "Electrical Department", "Civil Department", "Mechanical Department", "Merain Engineering" };
-    
 }

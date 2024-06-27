@@ -53,6 +53,11 @@
     </PagerContent>
 </MudTable>
 
+<MudButton OnClick="NavigateADD" Variant="Variant.Filled" Color="Color.Primary" Class="custom-back-button">
+    <MudIcon Icon="Icons.Material.Filled.ArrowBack" />
+    Back To ADD
+</MudButton>
+
 
 <MudMessageBox @ref="mbox" Title="Warning" CancelText="Cancel">
     <MessageContent>
@@ -70,6 +75,22 @@
         border-collapse: collapse;
         margin-top: 20px;
     }
+
+    .custom-back-button {
+        margin: 10px;
+        padding: 10px;
+        font-size: 16px;
+        background-color: #3f51b5; /* Primary color */
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+    }
+
+        .custom-back-button .mud-icon-root {
+           margin-right: 5px;
+        }
 
     .custom-table th, .custom-table td {
         border: 1px solid #ddd;
@@ -99,6 +120,12 @@
     private List<GetComResultsResponse> _comresults = new List<GetComResultsResponse>();
 
     MudMessageBox mbox { get; set; }
+
+    private void NavigateADD()
+    {
+        NavigationManager.NavigateTo("/ComResults");
+
+    }
 
 
     async Task DeleteResult(Guid comId)

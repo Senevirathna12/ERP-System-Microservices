@@ -10,6 +10,9 @@
 @inject ISnackbar Snackbar
 @inject HttpClient Http
 
+
+<MudSnackbarProvider />
+
  <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
     <MudTabPanel Text="Semester 1" OnClick="@(() => Navigation.NavigateTo("/ComResults"))"></MudTabPanel>
     <MudTabPanel Text="Semester 2" OnClick="@(() => Navigation.NavigateTo("/ComResultsSem2"))"></MudTabPanel>
@@ -23,9 +26,11 @@
 
 <style>
     h2 {
-        text-align: center;
+        /* text-align: center; */
         font-weight: bold;
-        text-decoration: underline;
+        /* text-decoration: underline; */
+        padding: 2% 0;
+
     }
 
     .my-custom-card {
@@ -79,12 +84,11 @@
     }
 </style>
 
-<h2><c>COM RESULTS</c></h2>
+<h2>COMPUTER ENGINEERING RESULTS</h2>
 
 <MudCard Class="my-custom-card">
     <h5><c>ADD RESULTS FROM EXCEL</c></h5>
     <InputFile @ref="fileInput" OnChange="HandleFileUpload" />
-    @* <MudButton class="btn btn-primary" @onclick="Save">Save All Com Results</MudButton> *@
     <MudButton class="btn btn-primary" @onclick="SaveAllComResults">Save All Com Results</MudButton>
 </MudCard>
 <div class="text-center mt-3">
@@ -120,6 +124,8 @@
                 comresults = await ReadComResultsFromExcel(file);
                 Snackbar.Add("File uploaded and processed successfully.", Severity.Success);
                 Console.WriteLine("File uploaded .....");
+
+                // SaveAllComResults();
             }
             catch (Exception ex)
             {
@@ -127,6 +133,7 @@
                 Console.WriteLine("File NOT uploaded .....");
             }
         }
+
     }
 
     public async Task<List<CreateComResultsRequest>> ReadComResultsFromExcel(IBrowserFile file)
