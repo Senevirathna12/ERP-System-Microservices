@@ -84,7 +84,7 @@
     @code {
     private string buttonGroupStyle = "display: flex; gap: 8px;";
 
-    MudMessageBox mbox { get; set; }
+    //MudMessageBox mbox { get; set; }
 
     public EventCallback onDelete { get; set; }
 
@@ -101,26 +101,37 @@
 
     async Task DeleteResult(Guid eleId)
     {
-        bool? result = await mbox.Show();
-        if (result == true)
+        var response = await Http.DeleteAsync($"https://localhost:7186/api/DeieResults/{eleId}");
+        if (response.IsSuccessStatusCode)
         {
-            var response = await Http.DeleteAsync($"https://localhost:7186/api/DeieResults/{eleId}");
-            if (response.IsSuccessStatusCode)
-            {
-                Snackbar.Add("Result Deleted Successfully", Severity.Success);
-                _elecresults = await Http.GetFromJsonAsync<List<GetDeieResultsResponse>>("https://localhost:7186/api/DeieResults");
-                StateHasChanged();
-            }
-            else
-            {
-                Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
-            }
-
+            Snackbar.Add("Result Deleted Successfully", Severity.Success);
+            _elecresults = await Http.GetFromJsonAsync<List<GetDeieResultsResponse>>("https://localhost:7186/api/DeieResults");
+            StateHasChanged();
         }
         else
         {
-            Snackbar.Add("Result is Not Deleted", Severity.Info);
+            Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
         }
+        //bool? result = await mbox.Show();
+        // if (result == true)
+        // {
+        //     var response = await Http.DeleteAsync($"https://localhost:7186/api/DeieResults/{eleId}");
+        //     if (response.IsSuccessStatusCode)
+        //     {
+        //         Snackbar.Add("Result Deleted Successfully", Severity.Success);
+        //         _elecresults = await Http.GetFromJsonAsync<List<GetDeieResultsResponse>>("https://localhost:7186/api/DeieResults");
+        //         StateHasChanged();
+        //     }
+        //     else
+        //     {
+        //         Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
+        //     }
+
+        // }
+        // else
+        // {
+        //     Snackbar.Add("Result is Not Deleted", Severity.Info);
+        // }
 
     }
 

@@ -107,7 +107,7 @@
     @code {
     private string buttonGroupStyle = "display: flex; gap: 8px;";
 
-    MudMessageBox mbox { get; set; }
+    //MudMessageBox mbox { get; set; }
 
     public EventCallback onDelete { get; set; }
 
@@ -124,26 +124,21 @@
 
     async Task DeleteResult(Guid comId)
     {
-        bool? result = await mbox.Show();
-        if (result == true)
-        {
-            var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
-            if (response.IsSuccessStatusCode)
-            {
-                Snackbar.Add("Result Deleted Successfully", Severity.Success);
-                _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
-                StateHasChanged();
-            }
-            else
-            {
-                Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
-            }
+        
 
+        var response = await Http.DeleteAsync($"https://localhost:7186/api/ComResults/{comId}");
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Result Deleted Successfully", Severity.Success);
+            _comresults = await Http.GetFromJsonAsync<List<GetComResultsResponse>>("https://localhost:7186/api/ComResults");
+            StateHasChanged();
         }
         else
         {
-            Snackbar.Add("Result is Not Deleted", Severity.Info);
+            Snackbar.Add("Connection error. Result is not deleted.", Severity.Error);
         }
+
+    
 
     }
 
